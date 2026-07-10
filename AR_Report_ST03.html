@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ติดตามยอดลูกหนี้</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Sarabun,sans-serif;font-size:15px;color:#222;background:#f5f5f3}
+.header{background:#fff;padding:.875rem 1.25rem;border-bottom:1px solid #e5e5e3}
+.header h1{font-size:20px;font-weight:700}
+.header p{font-size:12px;color:#999;margin-top:2px}
+
+/* สลับหน้าเว็บ (Tabs) */
+.tabs {display:flex;background:#fff;border-bottom:1px solid #e5e5e3;padding:0 1.25rem}
+.tab-btn {padding:12px 18px;font-family:inherit;font-size:13px;font-weight:600;color:#666;background:none;border:none;border-bottom:3px solid transparent;cursor:pointer;transition:all .15s}
+.tab-btn:hover {color:#185fa5}
+.tab-btn.active {color:#185fa5;border-bottom-color:#185fa5}
+
+.controls{background:#fff;padding:.75rem 1.25rem;border-bottom:1px solid #e5e5e3;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.controls label{font-size:13px;color:#666;white-space:nowrap}
+
+.search-wrapper {
+  flex: 1;
+  min-width: 200px;
+  max-width: 100%;
+}
+.search-input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  background: #fff;
+  font-family: inherit;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
+}
+.search-input:focus {
+  border-color: #185fa5;
+  outline: none;
+}
+
+/* แถบเมนูปุ่ม "เลือกรายการ" ด้านบนตาราง */
+.action-bar {
+  padding: 0 1.25rem;
+  margin-top: 10px;
+  display: flex;
+  justify-content: flex-start;
+}
+
+/* ปุ่มเลือกรายการสไตล์มืออาชีพ */
+.select-items-btn {
+  padding: 8px 16px;
+  background: #fff;
+  border: 1px solid #185fa5;
+  color: #185fa5;
+  border-radius: 6px;
+  font-size: 13px;
+  font-family: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  transition: all 0.15s;
+}
+.select-items-btn:hover {
+  background: #e6f1fb;
+  border-color: #144f8a;
+  color: #144f8a;
+}
+
+.summary{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:1rem 1.25rem}
+.card{background:#fff;border-radius:8px;padding:.875rem 1rem}
+.card .lbl{font-size:11px;color:#999;margin-bottom:4px}
+.card .amt{font-size:22px;font-weight:700}
+.c-inv .amt{color:#185fa5}.c-cr .amt{color:#a32d2d}.c-net .amt{color:#0f6e56}
+.section{padding:0 1.25rem 1.25rem}
+
+.sec-title-wrap {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+  padding-top: .75rem;
+}
+.sec-title{font-size:14px;font-weight:700;color:#222}
+
+.tbl-wrap{background:#fff;border-radius:8px;overflow-x:auto;border:1px solid #e5e5e3}
+table{width:100%;border-collapse:collapse;font-size:13px;min-width:650px}
+th{text-align:left;padding:8px 10px;color:#999;font-weight:400;border-bottom:1px solid #e5e5e3;font-size:11px;white-space:nowrap}
+td{padding:8px 10px;border-bottom:1px solid #f0f0ee;color:#333;vertical-align:middle;font-weight:500}
+tr:last-child td{border-bottom:none}
+td.r,th.r{text-align:right}
+.pill{display:inline-block;font-size:10px;padding:2px 7px;border-radius:99px;white-space:nowrap}
+.p-sale{background:#e6f1fb;color:#185fa5}
+.p-svc{background:#eaf3de;color:#3b6d11}
+.p-advance{background:#faeeda;color:#854f0b}
+.p-cr{background:#fcebeb;color:#a32d2d}
+
+.due-overdue { color: #a32d2d !important; font-size: 13px; font-weight: 700; }
+.due-today { color: #0f6e56 !important; font-size: 13px; font-weight: 700; }
+.due-future { color: #222222 !important; font-size: 13px; font-weight: 500; }
+.overdue{color:#a32d2d;font-weight:700}
+.c-red{color:#a32d2d}
+.empty{text-align:center;padding:2rem;color:#bbb;font-size:13px}
+.placeholder{text-align:center;padding:3rem 1rem;color:#bbb;font-size:14px}
+
+/* หน้าต่าง Popup (Modal) เลือกรายการ */
+.modal-overlay {position:fixed;inset:0;background:rgba(0,0,0,0.5);display:none;align-items:center;justify-content:center;z-index:200}
+.modal-box {background:#fff;border-radius:12px;width:90%;max-width:460px;max-height:85vh;display:flex;flex-direction:column;box-shadow:0 10px 40px rgba(0,0,0,0.2)}
+.modal-header {padding:15px;border-bottom:1px solid #e5e5e3;display:flex;justify-content:space-between;align-items:center}
+.modal-header h3 {font-size:16px;font-weight:700}
+
+/* แถบ Checkbox ปุ่มเดียวสไตล์คลีน */
+.modal-toolbar {
+  padding: 10px 15px;
+  background: #f8f9fa;
+  border-bottom: 1px solid #e5e5e3;
+  display: flex;
+  align-items: center;
+}
+.select-all-label {
+  display: flex;
+  align-items: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: #185fa5;
+  cursor: pointer;
+  user-select: none;
+}
+.select-all-label input {
+  width: 18px;
+  height: 18px;
+  margin-right: 8px;
+  cursor: pointer;
+}
+
+.modal-body {padding:15px;overflow-y:auto;flex:1;text-align:left}
+.modal-sec-title {font-size:13px;font-weight:700;color:#666;margin:10px 0 5px;padding-bottom:3px;border-bottom:1px dashed #ddd}
+.item-choice-row {display:flex;align-items:center;padding:8px 4px;border-bottom:1px solid #f9f9f9;cursor:pointer;font-size:13px}
+.item-choice-row:hover {background:#f5f9fc}
+.item-choice-row input {width:18px;height:18px;margin-right:10px;cursor:pointer}
+.item-choice-info {display:flex;justify-content:space-between;flex:1;align-items:center}
+.item-choice-amt {font-weight:700;font-size:13px}
+
+/* สไตล์แสดงป้ายวันที่แทนป้ายประเภทภายใน Modal */
+.modal-date-badge {
+  display: inline-block;
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: #f0f0ee;
+  color: #555;
+  font-weight: 600;
+  margin-left: 8px;
+  border: 1px solid #ddd;
+}
+
+/* กล่องสรุปยอดเงินสุทธิยอดใหญ่ด้านบนปุ่ม */
+.modal-summary-bar {
+  padding: 12px 20px;
+  background: #f8f9fa;
+  border-top: 1px solid #e5e5e3;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.modal-summary-lbl {
+  font-size: 14px;
+  font-weight: 700;
+  color: #444;
+}
+.modal-summary-amt {
+  font-size: 20px;
+  font-weight: 800;
+  color: #0f6e56;
+}
+
+.modal-footer {padding:12px;border-top:1px solid #e5e5e3;display:flex;gap:10px}
+.modal-btn-ok {flex:1;padding:10px;background:#185fa5;color:#fff;border:none;border-radius:6px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit}
+.modal-btn-cancel {padding:10px 15px;background:#eee;color:#333;border:none;border-radius:6px;font-size:14px;cursor:pointer;font-family:inherit}
+
+@media(max-width:520px){.summary{grid-template-columns:1fr}}
+
+.print-btn {
+  padding: 8px 12px;
+  background: #0f6e56;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-family: inherit;
+  cursor: pointer;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.clear-shop-btn {
+  padding: 8px 14px;
+  background: #a32d2d;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-family: inherit;
+  cursor: pointer;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: background 0.15s;
+}
+.clear-shop-btn:hover {
+  background: #822222;
+}
+</style>
+</head>
+<body>
+
+<div class="modal-overlay" id="item-modal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3>📋 เลือกรายการเอกสารเพื่อคำนวณยอด</h3>
+      <span style="cursor:pointer;font-size:18px;color:#999;" onclick="closeModal()">✕</span>
+    </div>
+    
+    <div class="modal-toolbar">
+      <label class="select-all-label">
+        <input type="checkbox" id="modal-select-all-cb" onchange="toggleAllModalItems(this.checked)">
+        <span id="select-all-text">เลือกทั้งหมด</span>
+      </label>
+    </div>
+
+    <div class="modal-body">
+      <div id="modal-sales-section">
+        <div class="modal-sec-title">📦 รายการขาย / บริการ</div>
+        <div id="modal-sales-list"></div>
+      </div>
+      <div id="modal-credits-section">
+        <div class="modal-sec-title">🔻 รายการลดหนี้ / เงินล่วงหน้า</div>
+        <div id="modal-credits-list"></div>
+      </div>
+    </div>
+
+    <div class="modal-summary-bar">
+      <span class="modal-summary-lbl">ยอดสุทธิที่ต้องชำระ:</span>
+      <span class="modal-summary-amt" id="modal-net-summary">฿0.00</span>
+    </div>
+
+    <div class="modal-footer">
+      <button class="modal-btn-cancel" onclick="closeModal()">ยกเลิก</button>
+      <button class="modal-btn-ok" onclick="applySelectedItems()">ตกลง</button>
+    </div>
+  </div>
+</div>
+
+<div id="app">
+  <div class="header">
+    <h1>📋 รายงานติดตามยอดลูกหนี้คงค้าง</h1>
+    <p>อัปเดตข้อมูล: 10/07/2569</p>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('tab1')">🗓️ รายงานหนี้ตามวันครบกำหนด</button>
+    <button class="tab-btn" onclick="switchTab('tab2')">🏪 สรุปยอดแยกรายร้านค้า</button>
+  </div>
+
+  <div id="page-tab1" class="tab-content">
+    <div class="section">
+      <div class="sec-title-wrap">
+        <span class="sec-title">รายการค้างชำระทั้งหมดเรียงตามความเร่งด่วน</span>
+        <button class="print-btn" onclick="window.print()">พิมพ์หน้านี้</button>
+      </div>
+      <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>ลูกหนี้ตามใบกำกับภาษี</th>
+              <th>เลขที่</th>
+              <th>ประเภท</th>
+              <th>วันที่</th>
+              <th>กำหนดชำระ</th>
+              <th>สถานะหนี้</th>
+              <th class="r">จำนวนเงิน</th>
+            </tr>
+          </thead>
+          <tbody id="b-all"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div id="page-tab2" class="tab-content" style="display:none">
+    <div class="controls">
+      <label for="shop-search">ค้นหาร้านค้า</label>
+      <div class="search-wrapper">
+        <input type="text" id="shop-search" class="search-input" list="shop-list" placeholder="🔍 พิมพ์ชื่อร้านหรือรหัสลูกหนี้..." autocomplete="off">
+        <datalist id="shop-list"></datalist>
+      </div>
+      <button type="button" class="clear-shop-btn" id="btn-clear-action">ล้างข้อมูล ✕</button>
+      <button class="print-btn" onclick="window.print()">พิมพ์รายงานร้านนี้</button>
+    </div>
+    
+    <div id="main" style="display:none">
+      <div class="action-bar">
+        <button class="select-items-btn" onclick="openItemModal()">⚙️ เลือกรายการคัดกรอง</button>
+      </div>
+
+      <div class="summary">
+        <div class="card c-inv"><div class="lbl">ยอดขาย + บริการ</div><div class="amt" id="s1">฿0</div></div>
+        <div class="card c-cr"><div class="lbl">ยอดลดหนี้ / ล่วงหน้า</div><div class="amt" id="s2">฿0</div></div>
+        <div class="card c-net"><div class="lbl">ยอดสุทธิคงเหลือ</div><div class="amt" id="s3">฿0</div></div>
+      </div>
+      
+      <div class="section">
+        <div class="sec-title-wrap"><div class="sec-title">รายการขาย / บริการ</div></div>
+        <div class="tbl-wrap"><table><thead><tr>
+          <th>เลขที่เอกสาร</th><th>ประเภท</th><th>วันที่</th><th>ครบกำหนด</th><th>สถานะหนี้</th><th class="r">จำนวนเงิน</th>
+        </tr></thead><tbody id="b1"></tbody></table></div>
+      </div>
+      
+      <div class="section">
+        <div class="sec-title-wrap"><div class="sec-title">รายการลดหนี้ / เงินล่วงหน้า</div></div>
+        <div class="tbl-wrap"><table><thead><tr>
+          <th>เลขที่เอกสาร</th><th>ประเภท</th><th>วันที่</th><th>ครบกำหนด</th><th>สถานะหนี้</th><th class="r">จำนวนเงิน</th>
+        </tr></thead><tbody id="b2"></tbody></table></div>
+      </div>
+    </div>
+    <div id="ph" class="placeholder">🏪<br><br>พิมพ์ชื่อร้านค้าในช่องค้นหาเพื่อดูยอดลูกหนี้</div>
+  </div>
+</div>
+
+<script>
+const DATA=[{"owner":"ST03","shop":"57-0001872-คิตตี้โมบาย  T2 KITTY MOBILE  PHROM PHIRAM","docNo":"SO-ST03-69-0008345","type":"การขาย","date":"07/07/2569","due":"21/07/2569","amount":10000},{"owner":"ST03","shop":"57-0000218-นันท์โมบาย T2 มารวยโฟน MA RUAI PHONE ( PICHAI)","docNo":"SO-ST03-69-0008154","type":"การขาย","date":"02/07/2569","due":"09/07/2569","amount":20000},{"owner":"ST03","shop":"57-0001345-เฟริสโมบาย(หนึ่งบึงพระ)","docNo":"SO-ST03-69-0008497","type":"การขาย","date":"10/07/2569","due":"17/07/2569","amount":13000},{"owner":"ST03","shop":"57-0002652-ร้านเคแอนด์เค (บางระกำ) K&K MOBILE (BANG RAKAM)","docNo":"SO-ST03-69-0008344","type":"การขาย","date":"07/07/2569","due":"14/07/2569","amount":5000},{"owner":"ST03","shop":"57-0002680-เสียงทิพย์บุ๊คเซ็นเตอร์","docNo":"SO-ST03-69-0008126","type":"การขาย","date":"02/07/2569","due":"06/08/2569","amount":1000},{"owner":"ST03","shop":"57-0001901-เอ็นเอฟ T2  NF MOBILE (WANG THONG)","docNo":"SO-ST03-69-0008495","type":"การขาย","date":"10/07/2569","due":"17/07/2569","amount":30000}];
+const CREDIT_TYPES=new Set(["ลดหนี้-อื่นๆ","ลดหนี้-รับคืน","เงินล่วงหน้า","เงินล่วงหน้า (เงินเกิน)"]);
+
+const fmt=n=>"฿"+Math.abs(n).toLocaleString("th-TH",{minimumFractionDigits:2,maximumFractionDigits:2});
+
+const fmtCardMinus=n=>{
+  const absStr = Math.abs(n).toLocaleString("th-TH",{minimumFractionDigits:2,maximumFractionDigits:2});
+  return n === 0 ? "฿0.00" : "-฿" + absStr;
+};
+
+let currentOwnerShops = new Set(); 
+let currentActiveRows = []; 
+let selectedDocMap = {}; 
+
+function pillClass(t){
+  if(CREDIT_TYPES.has(t)) return "p-cr";
+  if(t.includes("บริการ")) return "p-svc";
+  if(t.includes("ล่วงหน้า")) return "p-advance";
+  return "p-sale";
+}
+
+function getDueStatus(s){
+  if(!s||s==="-") return { text: '<span class="due-future">-</span>', code: 0, isOverdue: false };
+  const p=s.split("/");
+  if(p.length!==3) return { text: '<span class="due-future">-</span>', code: 0, isOverdue: false };
+  
+  const dueTime = new Date(Number(p[2])-543, Number(p[1])-1, Number(p[0])).getTime();
+  const upParts = "10/07/2569".split("/");
+  const todayTime = new Date(Number(upParts[2])-543, Number(upParts[1])-1, Number(upParts[0])).getTime();
+  
+  const diffTime = dueTime - todayTime;
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  
+  if (diffDays < 0) {
+    return { text: '<span class="due-overdue">เกินกำหนด ' + Math.abs(diffDays) + ' วัน ⚠</span>', code: diffDays, isOverdue: true };
+  } else if (diffDays === 0) {
+    return { text: '<span class="due-today">ครบกำหนดชำระ</span>', code: 0, isOverdue: false };
+  } else {
+    return { text: '<span class="due-future">ครบกำหนดอีก ' + diffDays + ' วัน</span>', code: diffDays, isOverdue: false };
+  }
+}
+
+function switchTab(tabId) {
+  document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(content => content.style.display = 'none');
+  
+  if(tabId === 'tab1') {
+    document.querySelectorAll('.tab-btn')[0].classList.add('active');
+    document.getElementById('page-tab1').style.display = 'block';
+    renderAllItemsPage();
+  } else {
+    document.querySelectorAll('.tab-btn')[1].classList.add('active');
+    document.getElementById('page-tab2').style.display = 'block';
+  }
+}
+
+function loadAllShops(){
+  const shops=[...new Set(DATA.map(r=>r.shop).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"th"));
+  currentOwnerShops = new Set(shops);
+  const dl=document.getElementById("shop-list");
+  dl.innerHTML='';
+  shops.forEach(s=>{
+    const o=document.createElement("option");
+    o.value=s; 
+    dl.appendChild(o);
+  });
+}
+
+function renderAllItemsPage() {
+  const tbody = document.getElementById("b-all");
+  if(!DATA.length) {
+    tbody.innerHTML = '<tr><td colspan="7" class="empty">ไม่มีข้อมูลรายงานค้างชำระ</td></tr>';
+    return;
+  }
+  const onlySalesRows = DATA.filter(r => r.type === "การขาย" || r.type === "การขาย (บริการ)");
+  
+  if(!onlySalesRows.length) {
+    tbody.innerHTML = '<tr><td colspan="7" class="empty">ไม่มีรายการขายหรือบริการค้างชำระ</td></tr>';
+    return;
+  }
+  const mappedRows = onlySalesRows.map(r => ({...r, statusInfo: getDueStatus(r.due)}));
+  mappedRows.sort((a,b) => a.statusInfo.code - b.statusInfo.code);
+  
+  tbody.innerHTML = mappedRows.map(r => {
+    const s = r.statusInfo;
+    const dueCell = s.isOverdue ? '<span class="overdue">'+r.due+'</span>' : r.due;
+    const amt = r.amount < 0 ? '<span class="c-red">('+fmt(r.amount)+')</span>' : fmt(r.amount);
+    return '<tr><td>'+r.shop+'</td><td>'+r.docNo+'</td><td><span class="pill '+pillClass(r.type)+'">'+r.type+'</span></td><td>'+r.date+'</td><td>'+dueCell+'</td><td>'+s.text+'</td><td class="r">'+amt+'</td></tr>';
+  }).join("");
+}
+
+// ผูกตัวแปรเข้ากับ element บนหน้าเว็บ
+const shopInput = document.getElementById("shop-search");
+
+// ดักจับการพ่นคำค้นหา
+shopInput.addEventListener("input",(e)=>{
+  const shop=e.target.value.trim();
+  if(!shop || !currentOwnerShops.has(shop)){
+    document.getElementById("main").style.display="none";
+    document.getElementById("ph").style.display="";
+    currentActiveRows = [];
+    selectedDocMap = {};
+    return;
+  }
+  
+  currentActiveRows = DATA.filter(r=>r.shop===shop);
+  selectedDocMap = {}; 
+  
+  refreshMainDisplay();
+  
+  document.getElementById("main").style.display="";
+  document.getElementById("ph").style.display="none";
+});
+
+document.getElementById("btn-clear-action").addEventListener("click", () => {
+  shopInput.value = "";
+  document.getElementById("main").style.display="none";
+  document.getElementById("ph").style.display="";
+  currentActiveRows = [];
+  selectedDocMap = {};
+  shopInput.focus();
+});
+
+function openItemModal() {
+  const inv = currentActiveRows.filter(r => !CREDIT_TYPES.has(r.type));
+  const cr = currentActiveRows.filter(r => CREDIT_TYPES.has(r.type));
+
+  const renderModalList = (targetDiv, list) => {
+    if(!list.length) { targetDiv.innerHTML = '<div style="color:#bbb;padding:10px;font-size:12px;">ไม่มีรายการ</div>'; return; }
+    targetDiv.innerHTML = list.map(r => {
+      const isChecked = selectedDocMap[r.docNo] !== false ? 'checked' : '';
+      const colorStyle = r.amount < 0 ? 'color:#a32d2d' : 'color:#185fa5';
+      const amtText = r.amount < 0 ? '('+fmt(r.amount)+')' : fmt(r.amount);
+      
+      return '<label class="item-choice-row">' +
+        '<input type="checkbox" class="modal-choice-cb" data-doc="'+r.docNo+'" '+isChecked+' onchange="onModalCheckboxChange()">' +
+        '<div class="item-choice-info">' +
+          '<div>' +
+            '<strong style="color:#333;">'+r.docNo+'</strong>' +
+            '<span class="modal-date-badge">'+r.date+'</span>' +
+          '</div>' +
+          '<div class="item-choice-amt" style="'+colorStyle+'">'+amtText+'</div>' +
+        '</div>' +
+      '</label>';
+    }).join("");
+  };
+
+  renderModalList(document.getElementById("modal-sales-list"), inv);
+  renderModalList(document.getElementById("modal-credits-list"), cr);
+  
+  updateMainCheckboxState();
+  calculateModalLiveTotal();
+  
+  document.getElementById("item-modal").style.display = "flex";
+}
+
+function closeModal() {
+  document.getElementById("item-modal").style.display = "none";
+}
+
+function toggleAllModalItems(isChecked) {
+  const checkboxes = document.querySelectorAll(".modal-choice-cb");
+  checkboxes.forEach(cb => {
+    cb.checked = isChecked;
+  });
+  document.getElementById("select-all-text").textContent = isChecked ? "ล้างทั้งหมด" : "เลือกทั้งหมด";
+  calculateModalLiveTotal();
+}
+
+function onModalCheckboxChange() {
+  updateMainCheckboxState();
+  calculateModalLiveTotal();
+}
+
+function updateMainCheckboxState() {
+  const checkboxes = document.querySelectorAll(".modal-choice-cb");
+  const mainCb = document.getElementById("modal-select-all-cb");
+  const textSpan = document.getElementById("select-all-text");
+  
+  if(checkboxes.length === 0) {
+    mainCb.checked = false;
+    textSpan.textContent = "เลือกทั้งหมด";
+    return;
+  }
+  
+  const checkedCount = Array.from(checkboxes).filter(cb => cb.checked).length;
+  
+  if(checkedCount === checkboxes.length) {
+    mainCb.checked = true;
+    mainCb.indeterminate = false;
+    textSpan.textContent = "ล้างทั้งหมด";
+  } else if(checkedCount > 0) {
+    mainCb.checked = false;
+    mainCb.indeterminate = true;
+    textSpan.textContent = "เลือกทั้งหมด";
+  } else {
+    mainCb.checked = false;
+    mainCb.indeterminate = false;
+    textSpan.textContent = "เลือกทั้งหมด";
+  }
+}
+
+function calculateModalLiveTotal() {
+  const checkboxes = document.querySelectorAll(".modal-choice-cb");
+  let total = 0;
+  
+  checkboxes.forEach(cb => {
+    if(cb.checked) {
+      const docNo = cb.getAttribute("data-doc");
+      const matchRow = currentActiveRows.find(r => r.docNo === docNo);
+      if(matchRow) {
+        total += matchRow.amount;
+      }
+    }
+  });
+  
+  const summaryAmtElement = document.getElementById("modal-net-summary");
+  if(total < 0) {
+    summaryAmtElement.textContent = "(" + fmt(total) + ")";
+    summaryAmtElement.style.color = "#a32d2d";
+  } else {
+    summaryAmtElement.textContent = fmt(total);
+    summaryAmtElement.style.color = "#0f6e56";
+  }
+}
+
+function applySelectedItems() {
+  const checkboxes = document.querySelectorAll(".modal-choice-cb");
+  checkboxes.forEach(cb => {
+    const docNo = cb.getAttribute("data-doc");
+    selectedDocMap[docNo] = cb.checked;
+  });
+
+  closeModal();
+  refreshMainDisplay(); 
+}
+
+function refreshMainDisplay() {
+  const inv = currentActiveRows.filter(r => !CREDIT_TYPES.has(r.type));
+  const cr = currentActiveRows.filter(r => CREDIT_TYPES.has(r.type));
+
+  const filteredInv = inv.filter(r => selectedDocMap[r.docNo] !== false);
+  const filteredCr = cr.filter(r => selectedDocMap[r.docNo] !== false);
+
+  const s1 = filteredInv.reduce((a,r) => a + r.amount, 0);
+  const s2 = filteredCr.reduce((a,r) => a + r.amount, 0);
+
+  document.getElementById("s1").textContent = fmt(s1);
+  document.getElementById("s2").textContent = fmtCardMinus(s2); 
+  document.getElementById("s3").textContent = fmt(s1 + s2);
+
+  renderRows(document.getElementById("b1"), filteredInv);
+  renderRows(document.getElementById("b2"), filteredCr);
+}
+
+function renderRows(tbody,list){
+  if(!list.length){tbody.innerHTML='<tr><td colspan="6" class="empty">ไม่มีรายการที่เลือก</td></tr>';return;}
+  tbody.innerHTML=list.map(r=>{
+    const s = getDueStatus(r.due);
+    const dueCell = s.isOverdue ? '<span class="overdue">'+r.due+'</span>' : r.due;
+    const amt = r.amount < 0 ? '<span class="c-red">('+fmt(r.amount)+')</span>' : fmt(r.amount);
+    return '<tr><td>'+r.docNo+'</td><td><span class="pill '+pillClass(r.type)+'">'+r.type+'</span></td><td>'+r.date+'</td><td>'+dueCell+'</td><td>'+s.text+'</td><td class="r">'+amt+'</td></tr>';
+  }).join("");
+}
+
+// คำสั่งทำงานอัตโนมัติเมื่อเปิดหน้าเว็บ
+loadAllShops();
+switchTab('tab1');
+</script>
+</body></html>
