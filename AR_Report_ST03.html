@@ -286,14 +286,17 @@ td.r,th.r{text-align:right}
     <h1>📋 รายงานติดตามยอดลูกหนี้คงค้าง
       <span class="owner-tag" id="owner-tag" title="เปลี่ยนผู้รับผิดชอบ"></span>
     </h1>
-    <p>อัปเดตข้อมูล: 15/07/2569</p>
+    <p>อัปเดตข้อมูล: 16/07/2569</p>
   </div>
 
+  <!-- แถบปุ่มสลับหน้าเว็บ (Tabs) เรียงลำดับใหม่ -->
   <div class="tabs">
     <button class="tab-btn active" onclick="switchTab('tab1')">🗓️ รายงานหนี้ตามวันครบกำหนด</button>
-    <button class="tab-btn" onclick="switchTab('tab2')">🏪 สรุปยอดแยกรายร้านค้า</button>
+    <button class="tab-btn" onclick="switchTab('tab2')">🔻 รายการลดหนี้ / เงินล่วงหน้าทั้งหมด</button>
+    <button class="tab-btn" onclick="switchTab('tab3')">🏪 สรุปยอดแยกรายร้านค้า</button>
   </div>
 
+  <!-- TAB 1: รายงานหนี้ตามวันครบกำหนด (เดิม) -->
   <div id="page-tab1" class="tab-content">
     <div class="section">
       <div class="sec-title-wrap">
@@ -319,7 +322,34 @@ td.r,th.r{text-align:right}
     </div>
   </div>
 
+  <!-- TAB 2 (ใหม่): รายการลดหนี้ / เงินล่วงหน้าทั้งหมด -->
   <div id="page-tab2" class="tab-content" style="display:none">
+    <div class="section">
+      <div class="sec-title-wrap">
+        <span class="sec-title">รายการลดหนี้และเงินล่วงหน้าทั้งหมดของผู้รับผิดชอบ</span>
+        <button class="print-btn" onclick="window.print()">พิมพ์หน้านี้</button>
+      </div>
+      <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>ร้านค้า / ลูกหนี้</th>
+              <th>เลขที่เอกสาร</th>
+              <th>ประเภท</th>
+              <th>วันที่</th>
+              <th>อายุเอกสาร</th> <!-- เปลี่ยนจาก 'กำหนดชำระ' -->
+              <th>สถานะอายุ</th>   <!-- เปลี่ยนจาก 'สถานะหนี้' -->
+              <th class="r">จำนวนเงิน</th>
+            </tr>
+          </thead>
+          <tbody id="b-credit-all"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 3 (เดิมคือ TAB 2): สรุปยอดแยกรายร้านค้า -->
+  <div id="page-tab3" class="tab-content" style="display:none">
     <div class="controls">
       <label for="shop-search">ค้นหาร้านค้า</label>
       <div class="search-wrapper">
@@ -360,7 +390,7 @@ td.r,th.r{text-align:right}
 </div>
 
 <script>
-const DATA=[{"owner":"ST03","shop":"57-0001872-คิตตี้โมบาย  T2 KITTY MOBILE  PHROM PHIRAM","docNo":"SO-ST03-69-0008756","type":"การขาย","date":"15/07/2569","due":"29/07/2569","amount":10000},{"owner":"ST03","shop":"57-0000218-นันท์โมบาย T2 มารวยโฟน MA RUAI PHONE ( PICHAI)","docNo":"SO-ST03-69-0008539","type":"การขาย","date":"11/07/2569","due":"18/07/2569","amount":20000},{"owner":"ST03","shop":"57-0000218-นันท์โมบาย T2 มารวยโฟน MA RUAI PHONE ( PICHAI)","docNo":"SO-ST03-69-0008542","type":"การขาย","date":"11/07/2569","due":"18/07/2569","amount":10000},{"owner":"ST03","shop":"67-0005041-บริษัท ไทยมาร์ท โมบาย จำกัด","docNo":"SO-ST03-69-0008643","type":"การขาย","date":"14/07/2569","due":"17/07/2569","amount":50000},{"owner":"ST03","shop":"57-0001345-เฟริสโมบาย(หนึ่งบึงพระ)","docNo":"SO-ST03-69-0008608","type":"การขาย","date":"13/07/2569","due":"20/07/2569","amount":13000},{"owner":"ST03","shop":"57-0002652-ร้านเคแอนด์เค (บางระกำ) K&K MOBILE (BANG RAKAM)","docNo":"SO-ST03-69-0008642","type":"การขาย","date":"14/07/2569","due":"21/07/2569","amount":5000},{"owner":"ST03","shop":"57-0002680-เสียงทิพย์บุ๊คเซ็นเตอร์","docNo":"SO-ST03-69-0008126","type":"การขาย","date":"02/07/2569","due":"06/08/2569","amount":1000},{"owner":"ST03","shop":"57-0001901-เอ็นเอฟ T2  NF MOBILE (WANG THONG)","docNo":"SO-ST03-69-0008495","type":"การขาย","date":"10/07/2569","due":"17/07/2569","amount":30000}];
+const DATA=[{"owner":"ST03","shop":"57-0001872-คิตตี้โมบาย  T2 KITTY MOBILE  PHROM PHIRAM","docNo":"SO-ST03-69-0008756","type":"การขาย","date":"15/07/2569","due":"29/07/2569","amount":10000},{"owner":"ST03","shop":"57-0000218-นันท์โมบาย T2 มารวยโฟน MA RUAI PHONE ( PICHAI)","docNo":"SO-ST03-69-0008539","type":"การขาย","date":"11/07/2569","due":"18/07/2569","amount":20000},{"owner":"ST03","shop":"57-0000218-นันท์โมบาย T2 มารวยโฟน MA RUAI PHONE ( PICHAI)","docNo":"SO-ST03-69-0008542","type":"การขาย","date":"11/07/2569","due":"18/07/2569","amount":10000},{"owner":"ST03","shop":"67-0005041-บริษัท ไทยมาร์ท โมบาย จำกัด","docNo":"SO-ST03-69-0008643","type":"การขาย","date":"14/07/2569","due":"17/07/2569","amount":50000},{"owner":"ST03","shop":"57-0001345-เฟริสโมบาย(หนึ่งบึงพระ)","docNo":"SO-ST03-69-0008776","type":"การขาย","date":"16/07/2569","due":"23/07/2569","amount":13000},{"owner":"ST03","shop":"57-0002680-เสียงทิพย์บุ๊คเซ็นเตอร์","docNo":"SO-ST03-69-0008126","type":"การขาย","date":"02/07/2569","due":"06/08/2569","amount":1000},{"owner":"ST03","shop":"57-0001901-เอ็นเอฟ T2  NF MOBILE (WANG THONG)","docNo":"SO-ST03-69-0008495","type":"การขาย","date":"10/07/2569","due":"17/07/2569","amount":30000}];
 const CREDIT_TYPES=new Set(["ลดหนี้-อื่นๆ","ลดหนี้-รับคืน","เงินล่วงหน้า","เงินล่วงหน้า (เงินเกิน)"]);
 
 const fmt=n=>"฿"+Math.abs(n).toLocaleString("th-TH",{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -387,7 +417,7 @@ function getDueStatus(s){
   if(p.length!==3) return { text: '<span class="due-future">-</span>', code: 0, isOverdue: false };
   
   const dueTime = new Date(Number(p[2])-543, Number(p[1])-1, Number(p[0])).getTime();
-  const upParts = "15/07/2569".split("/");
+  const upParts = "16/07/2569".split("/");
   const todayTime = new Date(Number(upParts[2])-543, Number(upParts[1])-1, Number(upParts[0])).getTime();
   
   const diffTime = dueTime - todayTime;
@@ -402,6 +432,32 @@ function getDueStatus(s){
   }
 }
 
+function getDocAge(docDateStr) {
+  if (!docDateStr || docDateStr === "-") return { days: 0, text: '<span class="due-future">-</span>' };
+  const p = docDateStr.split("/");
+  if (p.length !== 3) return { days: 0, text: '<span class="due-future">-</span>' };
+  
+  // แปลงวันที่เอกสาร (ปี พ.ศ. -> ค.ศ.)
+  const docTime = new Date(Number(p[2]) - 543, Number(p[1]) - 1, Number(p[0])).getTime();
+  // วันที่อัปเดตข้อมูลล่าสุด
+  const upParts = "16/07/2569".split("/");
+  const todayTime = new Date(Number(upParts[2]) - 543, Number(upParts[1]) - 1, Number(upParts[0])).getTime();
+  
+  const diffTime = todayTime - docTime;
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+  
+  if (diffDays <= 0) {
+    return { days: 0, text: '<span class="due-today">วันนี้</span>' };
+  } else {
+    // เน้นสีแดงเข้มขึ้นหากเอกสารค้างนาน (ตัวอย่างเช่น เกิน 30 วัน) สามารถปรับเปลี่ยนเงื่อนไขได้ตามต้องการ
+    const styleClass = diffDays > 30 ? 'due-overdue' : 'due-future';
+    return { 
+      days: diffDays, 
+      text: '<span class="' + styleClass + '">อายุ ' + diffDays + ' วัน</span>' 
+    };
+  }
+}
+
 function switchTab(tabId) {
   document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
   document.querySelectorAll('.tab-content').forEach(content => content.style.display = 'none');
@@ -410,9 +466,13 @@ function switchTab(tabId) {
     document.querySelectorAll('.tab-btn')[0].classList.add('active');
     document.getElementById('page-tab1').style.display = 'block';
     renderAllItemsPage();
-  } else {
+  } else if(tabId === 'tab2') {
     document.querySelectorAll('.tab-btn')[1].classList.add('active');
     document.getElementById('page-tab2').style.display = 'block';
+    renderAllCreditItemsPage(); // เรียกฟังก์ชันแสดงผลแท็บใหม่
+  } else {
+    document.querySelectorAll('.tab-btn')[2].classList.add('active');
+    document.getElementById('page-tab3').style.display = 'block';
   }
 }
 
@@ -467,26 +527,84 @@ function loadOwnerShops(owner){
 }
 
 function renderAllItemsPage() {
-  const ownerRows = DATA.filter(r => r.owner === selectedOwner);
+  // 1. ตรวจสอบก่อนว่ามีการเลือกรหัสผู้รับผิดชอบหรือยัง
+  if (!selectedOwner) return;
+
+  const ownerRows = DATA.filter(r => String(r.owner).trim() === String(selectedOwner).trim());
   const tbody = document.getElementById("b-all");
+  
+  if (!ownerRows.length) {
+    tbody.innerHTML = '<tr><td colspan="7" class="empty">ไม่มีข้อมูลรายงานค้างชำระของผู้รับผิดชอบท่านนี้</td></tr>';
+    return;
+  }
+  
+  // 2. ปรับตัวกรอง: อะไรก็ตามที่ไม่ใช่รายการลดหนี้/เงินล่วงหน้า (CREDIT_TYPES) ให้ถือเป็นรายการหนี้หลักทั้งหมด
+  // วิธีนี้จะปลอดภัยกว่าการดักชื่อ "การขาย" ตรงๆ เผื่อกรณีใน Excel สะกดต่างออกไป
+  const onlySalesRows = ownerRows.filter(r => !CREDIT_TYPES.has(r.type));
+  
+  if (!onlySalesRows.length) {
+    tbody.innerHTML = '<tr><td colspan="7" class="empty">ไม่มีรายการขายหรือบริการค้างชำระ</td></tr>';
+    return;
+  }
+  
+  // 3. แปลงและคำนวณสถานะวันครบกำหนด
+  const mappedRows = onlySalesRows.map(r => ({...r, statusInfo: getDueStatus(r.due)}));
+  
+  // 4. เรียงลำดับตามความเร่งด่วน (เกินกำหนดมากสุดอยู่บนสุด)
+  mappedRows.sort((a,b) => a.statusInfo.code - b.statusInfo.code);
+  
+  // 5. วาดตารางออกสู่หน้าจอ HTML
+  tbody.innerHTML = mappedRows.map(r => {
+    const s = r.statusInfo;
+    const dueCell = s.isOverdue ? '<span class="overdue">'+r.due+'</span>' : r.due;
+    const amt = r.amount < 0 ? '<span class="c-red">('+fmt(r.amount)+')</span>' : fmt(r.amount);
+    
+    return '<tr>' +
+      '<td>'+r.shop+'</td>' +
+      '<td>'+r.docNo+'</td>' +
+      '<td><span class="pill '+pillClass(r.type)+'">'+r.type+'</span></td>' +
+      '<td>'+r.date+'</td>' +
+      '<td>'+dueCell+'</td>' +
+      '<td>'+s.text+'</td>' +
+      '<td class="r">'+amt+'</td>' +
+    '</tr>';
+  }).join("");
+}
+
+function renderAllCreditItemsPage() {
+  const ownerRows = DATA.filter(r => r.owner === selectedOwner);
+  const tbody = document.getElementById("b-credit-all");
   
   if(!ownerRows.length) {
     tbody.innerHTML = '<tr><td colspan="7" class="empty">ไม่มีข้อมูลรายงานค้างชำระ</td></tr>';
     return;
   }
-  const onlySalesRows = ownerRows.filter(r => r.type === "การขาย" || r.type === "การขาย (บริการ)");
-  if(!onlySalesRows.length) {
-    tbody.innerHTML = '<tr><td colspan="7" class="empty">ไม่มีรายการขายหรือบริการค้างชำระ</td></tr>';
+  
+  const onlyCreditRows = ownerRows.filter(r => CREDIT_TYPES.has(r.type));
+  if(!onlyCreditRows.length) {
+    tbody.innerHTML = '<tr><td colspan="7" class="empty">ไม่มีรายการลดหนี้หรือเงินล่วงหน้าค้างชำระ</td></tr>';
     return;
   }
-  const mappedRows = onlySalesRows.map(r => ({...r, statusInfo: getDueStatus(r.due)}));
-  mappedRows.sort((a,b) => a.statusInfo.code - b.statusInfo.code);
+  
+  // คำนวณอายุเอกสารโดยใช้ค่าจากวันที่เอกสาร (r.date) แทนวันครบกำหนด
+  const mappedRows = onlyCreditRows.map(r => ({...r, ageInfo: getDocAge(r.date)}));
+  
+  // จัดเรียงตามอายุเอกสาร: จากอายุวันมากที่สุดไปหาน้อยที่สุด (เอกสารเก่าอยู่บน)
+  mappedRows.sort((a,b) => b.ageInfo.days - a.ageInfo.days);
   
   tbody.innerHTML = mappedRows.map(r => {
-    const s = r.statusInfo;
-    const dueCell = s.isOverdue ? '<span class="overdue">'+r.due+'</span>' : r.due;
+    const age = r.ageInfo;
     const amt = r.amount < 0 ? '<span class="c-red">('+fmt(r.amount)+')</span>' : fmt(r.amount);
-    return '<tr><td>'+r.shop+'</td><td>'+r.docNo+'</td><td><span class="pill '+pillClass(r.type)+'">'+r.type+'</span></td><td>'+r.date+'</td><td>'+dueCell+'</td><td>'+s.text+'</td><td class="r">'+amt+'</td></tr>';
+    
+    return '<tr>' +
+      '<td>'+r.shop+'</td>' +
+      '<td>'+r.docNo+'</td>' +
+      '<td><span class="pill '+pillClass(r.type)+'">'+r.type+'</span></td>' +
+      '<td>'+r.date+'</td>' +
+      '<td>'+r.date+'</td>' + // คอลัมน์อายุเอกสาร (แสดงวันที่คู่ขนาน หรือเปลี่ยนเป็นคำว่า - ก็ได้)
+      '<td>'+age.text+'</td>' + // แสดงข้อความ "อายุ X วัน"
+      '<td class="r">'+amt+'</td>' +
+    '</tr>';
   }).join("");
 }
 
