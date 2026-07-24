@@ -286,7 +286,7 @@ td.r,th.r{text-align:right}
     <h1>📋 รายงานติดตามยอดลูกหนี้คงค้าง
       <span class="owner-tag" id="owner-tag" title="เปลี่ยนผู้รับผิดชอบ"></span>
     </h1>
-    <p>อัปเดตข้อมูล: 23/07/2569</p>
+    <p>อัปเดตข้อมูล: 24/07/2569</p>
   </div>
 
   <!-- แถบปุ่มสลับหน้าเว็บ (Tabs) เรียงลำดับใหม่ -->
@@ -390,7 +390,7 @@ td.r,th.r{text-align:right}
 </div>
 
 <script>
-const DATA=[{"owner":"ST03","shop":"57-0000218-นันท์โมบาย T2 มารวยโฟน MA RUAI PHONE ( PICHAI)","docNo":"SO-ST03-69-0008847","type":"การขาย","date":"18/07/2569","due":"25/07/2569","amount":10000},{"owner":"ST03","shop":"57-0000218-นันท์โมบาย T2 มารวยโฟน MA RUAI PHONE ( PICHAI)","docNo":"SO-ST03-69-0009042","type":"การขาย","date":"23/07/2569","due":"30/07/2569","amount":20000},{"owner":"ST03","shop":"67-0005041-บริษัท ไทยมาร์ท โมบาย จำกัด","docNo":"SO-ST03-69-0009069","type":"การขาย","date":"23/07/2569","due":"26/07/2569","amount":50000},{"owner":"ST03","shop":"57-0001345-เฟริสโมบาย(หนึ่งบึงพระ)","docNo":"SO-ST03-69-0008886","type":"การขาย","date":"20/07/2569","due":"27/07/2569","amount":10300},{"owner":"ST03","shop":"57-0001345-เฟริสโมบาย(หนึ่งบึงพระ)","docNo":"SO-ST03-69-0008941","type":"การขาย","date":"20/07/2569","due":"27/07/2569","amount":2700},{"owner":"ST03","shop":"57-0001345-เฟริสโมบาย(หนึ่งบึงพระ)","docNo":"SO-ST03-69-0009068","type":"การขาย","date":"23/07/2569","due":"30/07/2569","amount":13000},{"owner":"ST03","shop":"57-0002680-เสียงทิพย์บุ๊คเซ็นเตอร์","docNo":"SO-ST03-69-0008126","type":"การขาย","date":"02/07/2569","due":"06/08/2569","amount":1000},{"owner":"ST03","shop":"57-0002680-เสียงทิพย์บุ๊คเซ็นเตอร์","docNo":"SO-ST03-69-0008883","type":"การขาย","date":"20/07/2569","due":"24/08/2569","amount":1000},{"owner":"ST03","shop":"57-0001901-เอ็นเอฟ T2  NF MOBILE (WANG THONG)","docNo":"SO-ST03-69-0009041","type":"การขาย","date":"23/07/2569","due":"30/07/2569","amount":30000}];
+const DATA=[{"owner":"ST03","shop":"57-0000218-นันท์โมบาย T2 มารวยโฟน MA RUAI PHONE ( PICHAI)","docNo":"SO-ST03-69-0008847","type":"การขาย","date":"18/07/2569","due":"25/07/2569","amount":10000},{"owner":"ST03","shop":"57-0000218-นันท์โมบาย T2 มารวยโฟน MA RUAI PHONE ( PICHAI)","docNo":"SO-ST03-69-0009042","type":"การขาย","date":"23/07/2569","due":"30/07/2569","amount":20000},{"owner":"ST03","shop":"67-0005041-บริษัท ไทยมาร์ท โมบาย จำกัด","docNo":"SO-ST03-69-0009069","type":"การขาย","date":"23/07/2569","due":"26/07/2569","amount":50000},{"owner":"ST03","shop":"57-0001345-เฟริสโมบาย(หนึ่งบึงพระ)","docNo":"SO-ST03-69-0009068","type":"การขาย","date":"23/07/2569","due":"30/07/2569","amount":13000},{"owner":"ST03","shop":"57-0002680-เสียงทิพย์บุ๊คเซ็นเตอร์","docNo":"SO-ST03-69-0008126","type":"การขาย","date":"02/07/2569","due":"06/08/2569","amount":1000},{"owner":"ST03","shop":"57-0002680-เสียงทิพย์บุ๊คเซ็นเตอร์","docNo":"SO-ST03-69-0008883","type":"การขาย","date":"20/07/2569","due":"24/08/2569","amount":1000},{"owner":"ST03","shop":"57-0001901-เอ็นเอฟ T2  NF MOBILE (WANG THONG)","docNo":"SO-ST03-69-0009041","type":"การขาย","date":"23/07/2569","due":"30/07/2569","amount":30000}];
 const CREDIT_TYPES=new Set(["ลดหนี้-อื่นๆ","ลดหนี้-รับคืน","เงินล่วงหน้า","เงินล่วงหน้า (เงินเกิน)"]);
 
 const fmt=n=>"฿"+Math.abs(n).toLocaleString("th-TH",{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -417,7 +417,7 @@ function getDueStatus(s){
   if(p.length!==3) return { text: '<span class="due-future">-</span>', code: 0, isOverdue: false };
   
   const dueTime = new Date(Number(p[2])-543, Number(p[1])-1, Number(p[0])).getTime();
-  const upParts = "23/07/2569".split("/");
+  const upParts = "24/07/2569".split("/");
   const todayTime = new Date(Number(upParts[2])-543, Number(upParts[1])-1, Number(upParts[0])).getTime();
   
   const diffTime = dueTime - todayTime;
@@ -440,7 +440,7 @@ function getDocAge(docDateStr) {
   // แปลงวันที่เอกสาร (ปี พ.ศ. -> ค.ศ.)
   const docTime = new Date(Number(p[2]) - 543, Number(p[1]) - 1, Number(p[0])).getTime();
   // วันที่อัปเดตข้อมูลล่าสุด
-  const upParts = "23/07/2569".split("/");
+  const upParts = "24/07/2569".split("/");
   const todayTime = new Date(Number(upParts[2]) - 543, Number(upParts[1]) - 1, Number(upParts[0])).getTime();
   
   const diffTime = todayTime - docTime;
